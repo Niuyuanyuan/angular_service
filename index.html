@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script src="https://cdn.static.runoob.com/libs/angular.js/1.4.6/angular.min.js"></script>
+	<title>angular的服务</title>
+
+	<style>
+		input.ng-invalid {
+		    background-color: lightblue;
+		}
+	</style>
+
+</head>
+<body ng-app="myApp" ng-controller="myCtrl">
+
+
+    <!-- 当前页面的url -->
+    <div  ng-controller="myCtrl">
+	    <h1>1、</h1>
+		<h2>当前页面的url:</h2>
+		<h3>{{myUrl}}</h3>
+		<br><br>
+	</div>
+
+
+    <!-- $http服务向服务器请求信息，返回的值会放入变量“myWelcome”中。 -->
+    <div ng-controller="myHttp">
+	    <h1>2、</h1>
+		<h2>$http服务向服务器请求信息，返回的值会放入变量“myWelcome”中</h2>
+		<h3>{{myWelcome}}</h3>
+	</div>
+	<br><br>
+
+
+	<!-- $timeout 访问在规定的毫秒数后执行指定函数。 -->
+    <div ng-controller="myTimeout">
+	    <h1>3、</h1>
+		<h2>$timeout 访问在规定的毫秒数后执行指定函数。</h2>
+		<p>两秒后显示信息</p>
+		<h3>{{myHeader}}</h3>
+	</div>
+	<br><br>
+
+
+
+	<!-- 获取现在时间 -->
+    <div ng-controller="myTime">
+	    <h1>4、</h1>
+		<h2>现在时间是</h2>
+		<p>现在时间是:</p>
+		<h3>{{theTime}}</h3>
+		<p>$interval 访问在指定的周期(以毫秒计)来调用函数或计算表达式。</p>
+	</div>
+	<br><br>
+
+	<!-- 自定义服务，用于转换16进制数： -->
+    <div ng-controller="myHex">
+	    <h1>5、</h1>
+		<h2>自定义服务，用于转换16进制数：</h2>
+		<p>255 的16进制是:</p>
+		<h3>{{hex}}</h3>
+	</div>
+	<br><br>
+
+
+	<!-- 在过滤器中使用服务 -->
+    <div ng-controller="myHex">
+	    <h1>6、</h1>
+		<h2>在过滤器中使用服务</h2>
+		<h3>{{255 | myFormat}}</h3>
+	</div>
+	<br><br>
+
+
+	<!-- 在获取数组值时使用过滤器: -->
+    <div ng-controller="myHex">
+	    <h1>7、</h1>
+		<h2>在获取数组 [255, 251, 200] 值时使用过滤器:</h2>
+		<ul>
+			<li ng-repeat="x in counts">{{ x | myFormat}}</li>
+		</ul>
+		<p>过滤器使用服务将10进制转换为16进制。</p>
+	</div>
+	<br><br>
+
+
+
+	<!-- 读取远程服务器的数据 -->
+    <div ng-controller="siteCtrl">
+	    <h1>7、</h1>
+		<h2>读取远程服务器的数据。</h2>
+		<ul>
+			<li ng-repeat="x in names">
+				{{x.Name + ',' +x.Country}}
+			</li>
+		</ul>
+	</div>
+	<br><br>
+
+
+
+	<!-- 使用 ng-options 创建选择框 -->
+    <div ng-controller="myOption">
+	    <h1>8、</h1>
+		<h2>使用 ng-options 创建选择框</h2>
+		<select ng-init="selectedName = names[0]" ng-model="selectedName" ng-options="x for x in names">			
+		</select>
+		<p>该实例演示了 ng-options 指令的使用。</p>
+	</div>
+	<br><br>
+
+
+
+
+
+
+    
+
+
+
+
+<script>
+ 
+  var app = angular.module("myApp",[]);
+ 
+  //获得当前页面的url
+  app.controller("myCtrl",function($scope,$location){
+      $scope.myUrl = $location.absUrl();
+  });
+
+  //http服务向服务器请求信息，返回的值会放入变量“myWelcome”中。
+  app.controller("myHttp",function($scope,$http){
+  	  $http.get("welcome.html").then(function(response){
+  	  	$scope.myWelcome = response.data;
+  	  })
+  });
+
+  //$timeout 访问在规定的毫秒数后执行指定函数。
+  app.controller("myTimeout",function($scope,$timeout) {
+  	$timeout(function() {
+  		$scope.myHeader = "How are you today？";
+  	},2000);
+  });
+
+  //现在时间
+  app.controller("myTime",function($scope,$interval) {
+  	$scope.theTime = new Date().toLocaleTimeString();
+  	$interval(function(){
+  		$scope.theTime = new Date().toLocaleTimeString();
+  	},1000);
+  });
+
+  //进制转换
+  app.service('hexafy',function() {
+  	this.myFunc = function (x) {
+  		return x.toString(16);
+  	}
+  });
+  app.controller("myHex",function($scope,hexafy){
+    $scope.hex = hexafy.myFunc(255);
+  });
+
+  //在过滤器中使用服务(控制器和上面相同)
+  app.filter('myFormat',['hexafy', function(hexafy) {
+  	return function(x) {
+  		return hexafy.myFunc(x);
+  	}
+  }])
+
+  //在获取数组值时使用过滤器(控制器、过滤和上面相同)
+  app.controller('myCtrl', function($scope) {
+  	$scope.counts = [255,251,200];
+  })
+
+  //读取远程服务器的数据。
+  app.controller('siteCtrl',function($scope,$http){
+  	$http.get("http://www.wyzwedu.com/data/sites.php")
+  	.success(function(response) {$scope.names=response.sites});
+  })
+
+  //使用 ng-options 创建选择框 
+  app.controller('myOption',function($scope) {
+  	$scope.names = ["Google","Runoob","Taobao"];
+  })
+
+
+
+ 
+</script>		
+</body>
+</html>
